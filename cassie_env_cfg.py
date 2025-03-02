@@ -36,8 +36,8 @@ from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAACLAB_NUCLEUS_DIR
 
-import isaaclab_tasks.manager_based.classic.cassie.mdp as mdp
-from isaaclab_assets import CARTPOLE_CFG, RIDGEBACK_FRANKA_PANDA_CFG, FRANKA_PANDA_CFG, CASSIE_CFG  # isort:skip
+import isaaclab_tasks.manager_based.classic.cassie_omniverse.mdp as mdp
+# from isaaclab_assets import CARTPOLE_CFG, RIDGEBACK_FRANKA_PANDA_CFG, FRANKA_PANDA_CFG, CASSIE_CFG  # isort:skip
 
 
 ##
