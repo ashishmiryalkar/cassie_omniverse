@@ -37,28 +37,14 @@ from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAACLAB_NUCLEUS_DIR
 
 import isaaclab_tasks.manager_based.classic.cassie_omniverse.mdp as mdp
-# from isaaclab_assets import CARTPOLE_CFG, RIDGEBACK_FRANKA_PANDA_CFG, FRANKA_PANDA_CFG, CASSIE_CFG  # isort:skip
 
+from .terrains import PYRAMID_STAIRS
 
 ##
 # Scene definition
 ##
-
-@configclass
-class MySceneCfg(InteractiveSceneCfg):
-    """Configuration for the terrain scene with a humanoid robot."""
-
-    # terrain
-    terrain = TerrainImporterCfg(
-        prim_path="/World/ground",
-        terrain_type="plane",
-        collision_group=-1,
-        physics_material=sim_utils.RigidBodyMaterialCfg(static_friction=1.0, dynamic_friction=1.0, restitution=0.0),
-        debug_vis=False,
-    )
-
-    # robot
-    robot = ArticulationCfg(
+def robot_configuration():
+    return ArticulationCfg(
         prim_path="{ENV_REGEX_NS}/Robot",
         spawn=sim_utils.UsdFileCfg(
             usd_path=f"{ISAACLAB_NUCLEUS_DIR}/Robots/Agility/Cassie/cassie.usd",
@@ -130,7 +116,22 @@ class MySceneCfg(InteractiveSceneCfg):
         },
     )
 
-    # robot: ArticulationCfg = CASSIE_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+
+@configclass
+class MySceneCfg(InteractiveSceneCfg):
+    """Configuration for the terrain scene with a humanoid robot."""
+
+    # terrain
+    terrain = TerrainImporterCfg(
+        prim_path="/World/ground",
+        terrain_type="plane",
+        collision_group=-1,
+        physics_material=sim_utils.RigidBodyMaterialCfg(static_friction=1.0, dynamic_friction=1.0, restitution=0.0),
+        debug_vis=False,
+    )
+
+    # robot
+    robot = robot_configuration()
 
     # lights
     light = AssetBaseCfg(
@@ -138,6 +139,29 @@ class MySceneCfg(InteractiveSceneCfg):
         spawn=sim_utils.DistantLightCfg(color=(0.75, 0.75, 0.75), intensity=3000.0),
     )
 
+
+@configclass
+class MyScenePyramidStairsCfg(InteractiveSceneCfg):
+    """Configuration for the terrain scene with a humanoid robot."""
+
+    # terrain
+    terrain = TerrainImporterCfg(
+        prim_path="/World/ground",
+        max_init_terrain_level=None,
+        terrain_type="generator",
+        terrain_generator=PYRAMID_STAIRS,
+        visual_material=None,
+        debug_vis=False,
+    )
+
+    # robot
+    robot = robot_configuration()
+
+    # lights
+    light = AssetBaseCfg(
+        prim_path="/World/light",
+        spawn=sim_utils.DistantLightCfg(color=(0.75, 0.75, 0.75), intensity=3000.0),
+    )
 
 @configclass
 class ActionsCfg:
@@ -283,11 +307,39 @@ class TerminationsCfg:
 
 
 @configclass
-class CassieEnvCfg(ManagerBasedRLEnvCfg):
+class CassieGroundPlaneEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the MuJoCo-style Humanoid walking environment."""
 
     # Scene settings
-    scene: MySceneCfg = MySceneCfg(num_envs=4096, env_spacing=5.0)
+    scene: MySceneCfg = MySceneCfg(num_envs=1024, env_spacing=5.0)
+    # Basic settings
+    observations: ObservationsCfg = ObservationsCfg()
+    actions: ActionsCfg = ActionsCfg()
+    # MDP settings
+    rewards: RewardsCfg = RewardsCfg()
+    terminations: TerminationsCfg = TerminationsCfg()
+    events: EventCfg = EventCfg()
+
+    def __post_init__(self):
+        """Post initialization."""
+        # general settings
+        self.decimation = 2
+        self.episode_length_s = 16.0
+        # simulation settings
+        self.sim.dt = 1 / 120.0
+        self.sim.render_interval = self.decimation
+        self.sim.physx.bounce_threshold_velocity = 0.2
+        # default friction material
+        self.sim.physics_material.static_friction = 1.0
+        self.sim.physics_material.dynamic_friction = 1.0
+        self.sim.physics_material.restitution = 0.0
+
+@configclass
+class CassiePyramidStairsPlaneEnvCfg(ManagerBasedRLEnvCfg):
+    """Configuration for the MuJoCo-style Humanoid walking environment."""
+
+    # Scene settings
+    scene: MyScenePyramidStairsCfg = MyScenePyramidStairsCfg(num_envs=1024, env_spacing=5.0)
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()
