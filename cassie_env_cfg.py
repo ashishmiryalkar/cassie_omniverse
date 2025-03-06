@@ -244,55 +244,36 @@ class RewardsCfg:
     upright = RewTerm(func=mdp.upright_posture_bonus, weight=0.1, params={"threshold": 0.7})
     # (4) Reward for moving in the right direction
     move_to_target = RewTerm(
-        func=mdp.move_to_target_bonus, weight=0.5, params={"threshold": 0.8, "target_pos": (1000.0, 0.0, 0.0)}
+        func=mdp.move_to_target_bonus, weight=0.1, params={"threshold": 0.8, "target_pos": (1000.0, 0.0, 0.0)}
     )
     velocity_penalty = RewTerm(
-        func=mdp.root_vel, weight=-1.0, params={"target_lin_vel": 1.0, "target_ang_vel": None}
+        func=mdp.root_vel, weight=-2.0, params={"target_lin_vel": 0.5, "target_ang_vel": None}
     )
     # keep_legs_close = RewTerm(
     #     func=mdp.legs_straight_reward, weight=0.1
     # )
     # terminating = RewTerm(func=mdp.is_terminated, weight=-2.0)
 
-    # print(progress, alive, upright, move_to_target)
-    # (5) Penalty for large action commands
-    # action_l2 = RewTerm(func=mdp.action_l2, weight=-0.01)
-    # (6) Penalty for energy consumption
-    # energy = RewTerm(
-    #     func=mdp.power_consumption,
-    #     weight=-0.005,
-    #     params={
-    #         "gear_ratio": {
-    #             ".*_waist.*": 67.5,
-    #             ".*_upper_arm.*": 67.5,
-    #             "pelvis": 67.5,
-    #             ".*_lower_arm": 45.0,
-    #             ".*_thigh:0": 45.0,
-    #             ".*_thigh:1": 135.0,
-    #             ".*_thigh:2": 45.0,
-    #             ".*_shin": 90.0,
-    #             ".*_foot.*": 22.5,
-    #         }
-    #     },
-    # )
-    # (7) Penalty for reaching close to joint limits
-    # joint_limits = RewTerm(
-    #     func=mdp.joint_limits_penalty_ratio,
-    #     weight=-0.25,
-    #     params={
-    #         "threshold": 0.98,
-    #         "gear_ratio": {
-    #             ".*_waist.*": 67.5,
-    #             ".*_upper_arm.*": 67.5,
-    #             "pelvis": 67.5,
-    #             ".*_lower_arm": 45.0,
-    #             ".*_thigh:0": 45.0,
-    #             ".*_thigh:1": 135.0,
-    #             ".*_thigh:2": 45.0,
-    #             ".*_shin": 90.0,
-    #             ".*_foot.*": 22.5,
-    #         },
-    #     },
+
+@configclass
+class PyramidStairsRewardsCfg:
+    """Reward terms for the MDP."""
+
+    # (1) Reward for moving forward
+    progress = RewTerm(func=mdp.progress_reward, weight=1.0, params={"target_pos": (1000.0, 0.0, 0.0)})
+    # (2) Stay alive bonus
+    alive = RewTerm(func=mdp.is_alive, weight=1.0)
+    # (3) Reward for non-upright posture
+    upright = RewTerm(func=mdp.robot_posture_height_bonus, weight=-0.5, params={"threshold": 0.7})
+    # (4) Reward for moving in the right direction
+    move_to_target = RewTerm(
+        func=mdp.move_to_target_bonus, weight=0.5, params={"threshold": 0.8, "target_pos": (1000.0, 0.0, 0.0)}
+    )
+    cross_legs = RewTerm(
+        func=mdp.cross_legs, weight = 0.5
+    )
+    # velocity_penalty = RewTerm(
+    #     func=mdp.root_vel, weight=-0.5, params={"target_lin_vel": 0.7, "target_ang_vel": None}
     # )
 
 
@@ -304,6 +285,18 @@ class TerminationsCfg:
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
     # (2) Terminate if the robot falls
     torso_height = DoneTerm(func=mdp.root_height_below_minimum, params={"minimum_height": 0.4})
+
+
+@configclass
+class PyramidStairsTerminationsCfg:
+    """Termination terms for the MDP."""
+
+    # (1) Terminate if the episode length is exceeded
+    time_out = DoneTerm(func=mdp.time_out, time_out=True)
+    # (2) Terminate if the robot falls
+    torso_height1 = DoneTerm(func=mdp.root_height_below_minimum, params={"minimum_height": 0.4})
+    # (2) Terminate if the robot falls
+    torso_height = DoneTerm(func=mdp.total_robot_height_below_minimum, params={"threshold": 0.4, "feet_distance": 0.9})
 
 
 @configclass
@@ -339,13 +332,13 @@ class CassiePyramidStairsPlaneEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the MuJoCo-style Humanoid walking environment."""
 
     # Scene settings
-    scene: MyScenePyramidStairsCfg = MyScenePyramidStairsCfg(num_envs=1024, env_spacing=5.0)
+    scene: MyScenePyramidStairsCfg = MyScenePyramidStairsCfg(num_envs=2048, env_spacing=5.0)
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()
     # MDP settings
     rewards: RewardsCfg = RewardsCfg()
-    terminations: TerminationsCfg = TerminationsCfg()
+    terminations: PyramidStairsTerminationsCfg = PyramidStairsTerminationsCfg()
     events: EventCfg = EventCfg()
 
     def __post_init__(self):

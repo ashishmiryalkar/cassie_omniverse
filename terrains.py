@@ -12,8 +12,8 @@ from isaaclab.terrains.terrain_generator_cfg import TerrainGeneratorCfg
 PYRAMID_STAIRS = TerrainGeneratorCfg(
     size=(8.0, 8.0),
     border_width=20.0,
-    num_rows=45,
-    num_cols=25,
+    num_rows=25,
+    num_cols=21,
     horizontal_scale=0.1,
     vertical_scale=0.005,
     slope_threshold=0.75,
@@ -23,7 +23,7 @@ PYRAMID_STAIRS = TerrainGeneratorCfg(
             proportion=1.0,
             step_height_range=(0.05, 0.20),
             step_width=0.3,
-            platform_width=3.0,
+            platform_width=4.0,
             border_width=1.0,
             holes=False,
         ),
@@ -42,7 +42,7 @@ PYRAMID_STAIRS = TerrainGeneratorCfg(
         #     proportion=0.2, noise_range=(0.02, 0.10), noise_step=0.02, border_width=0.25
         # ),
         # "hf_pyramid_slope": terrain_gen.HfPyramidSlopedTerrainCfg(
-        #     proportion=0.1, slope_range=(0.0, 0.4), platform_width=2.0, border_width=0.25
+        #     proportion=1.0, slope_range=(0.0, 0.4), platform_width=2.0, border_width=0.25
         # ),
         # "hf_pyramid_slope_inv": terrain_gen.HfInvertedPyramidSlopedTerrainCfg(
         #     proportion=0.1, slope_range=(0.0, 0.4), platform_width=2.0, border_width=0.25

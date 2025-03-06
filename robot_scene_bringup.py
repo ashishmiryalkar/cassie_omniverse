@@ -82,14 +82,10 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     # Extract scene entities
     # note: we only do this here for readability.
     robot = scene["cartpole"]
-    print(scene.keys(), type(scene["cartpole"]))
-    print(robot.data, type(robot.data))
-    print("robot type", type(robot))
-    print(robot.actuators, type(robot.actuators))
-    print(robot.is_fixed_base)
 
     # robot_base = robot.data["base"]
-
+    print('body', robot.data.body_names)
+    print('joint', robot.data.joint_names)
 
     # Define simulation stepping
     sim_dt = sim.get_physics_dt()
@@ -105,7 +101,9 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             # we offset the root state by the origin since the states are written in simulation world frame
             # if this is not done, then the robots will be spawned at the (0, 0, 0) of the simulation world
             root_state = robot.data.default_root_state.clone()
+            
             root_state[:, :3] += scene.env_origins
+            print("*************new episode**************")
             robot.write_root_pose_to_sim(root_state[:, :7])
             robot.write_root_velocity_to_sim(root_state[:, 7:])
             # print(root_state)
@@ -125,6 +123,12 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         # robot.set_joint_effort_target(efforts)
         # -- write data to sim
         scene.write_data_to_sim()
+        # print('pelvis', robot.data.body_com_pos_w[:, 0, 2])
+        # print('left toe', robot.data.body_com_pos_w[:, -1, 2])
+        # print('right toe', robot.data.body_com_pos_w[:, -2, 2])
+        print('pelvis left toe', abs(robot.data.body_com_pos_w[:, 0, 2] - robot.data.body_com_pos_w[:, -1, 2]))
+        print('pelvis right toe', abs(robot.data.body_com_pos_w[:, 0, 2] - robot.data.body_com_pos_w[:, -2, 2]))
+        print()
         # Perform step
         sim.step()
         # Increment counter

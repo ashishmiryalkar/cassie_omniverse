@@ -28,6 +28,19 @@ def base_yaw_roll(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityC
 
     return torch.cat((yaw.unsqueeze(-1), roll.unsqueeze(-1)), dim=-1)
 
+def get_robot_height(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    "Get total current posture height of the robot"
+    asset: Articulation = env.scene[asset_cfg.name]
+    pelvis, rt, lt = asset.data.body_com_pos_w[:, 0, 2], asset.data.body_com_pos_w[:, -1, 2], asset.data.body_com_pos_w[:, -2, 2]
+    # print(pelvis, rt, lt, flush=True)
+    # print()
+    return pelvis, rt, lt
+
+def get_robot_y_vals(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    asset: Articulation = env.scene[asset_cfg.name]
+    rt, lt = asset.data.boby_com_pos_w[:, -1, 1], asset.data.body_com_pos_w[:, -2, 1]
+    return rt > lt
+
 def base_up_proj(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Projection of the base up vector onto the world up vector."""
     # extract the used quantities (to enable type-hinting)
