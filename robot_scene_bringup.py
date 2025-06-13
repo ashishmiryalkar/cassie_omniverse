@@ -11,6 +11,7 @@
     ./isaaclab.sh -p scripts/tutorials/02_scene/create_scene.py --num_envs 32
 
 """
+import secrets
 
 """Launch Isaac Sim Simulator first."""
 
@@ -41,8 +42,6 @@ from isaaclab.scene import InteractiveScene, InteractiveSceneCfg
 from isaaclab.sim import SimulationContext
 from isaaclab.utils import configclass
 
-import random
-
 ##
 # Pre-defined configs
 ##
@@ -70,7 +69,7 @@ class CartpoleSceneCfg(InteractiveSceneCfg):
             physics_material=sim_utils.RigidBodyMaterialCfg(),
             visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.5, 0.0, 0.0)),
         ),
-        init_state=RigidObjectCfg.InitialStateCfg(pos=(round(random.random(), 2), round(random.random(), 2), 0)),
+        init_state=RigidObjectCfg.InitialStateCfg(pos=(round(secrets.SystemRandom().random(), 2), round(secrets.SystemRandom().random(), 2), 0)),
     )
 
     # articulation
